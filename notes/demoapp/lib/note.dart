@@ -140,9 +140,13 @@ Future<void> updateNote(int noteid,String updatednote) async {
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
-      title: const Text('Notes App'), // Add app title
+      title: const Text('Notes App',
+      style: TextStyle(
+        color: Colors.white
+            ),), 
+      backgroundColor: Colors.black12,
     ),
-    backgroundColor: Colors.white,
+    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
     body: Padding(
       padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
       child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -160,7 +164,7 @@ Widget build(BuildContext context) {
             final List<Map<String, dynamic>> notes = snapshot.data!;
             return Column(
               children: [
-                const SizedBox(height: 20), // Add space between app title and list
+                const SizedBox(height: 20), 
                 Expanded(
                   child: ListView.builder(
                     scrollDirection: Axis.vertical,
