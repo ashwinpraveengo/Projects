@@ -38,21 +38,104 @@ class _NoteScreenState extends State<NoteScreen> {
   }
 
 
-  Future<void> CreateNote(String newnote) async {
-    final response=await http.post(Uri.parse('http://10.0.2.2:8000/notes/create/'),
-    body: jsonEncode(<String, dynamic>{
-        'note_name': newnote,
-      }),
-      );
-    if (response.statusCode==300){
-      setState(() {
-      });
-      print("Post done");
-    }else{
-      print("Failed${response.statusCode}");
-    }
+Future<void> createNote(String newNote) async {
+  final response = await http.post(
+    Uri.parse('http://10.0.2.2:8000/notes/create/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'body': newNote,
+    }),
+  );
 
+  if (response.statusCode == 200) {
+    setState(() {
+      _notesFuture = fetchNotes();
+    });
+    print('Post done');
+  } else {
+    print('Failed ${response.statusCode}');
   }
+}
+
+
+Future<void> deleteNote(int noteid) async{
+  final response = await http.delete(
+    Uri.parse('http://10.0.2.2:8000/notes/$noteid/delete/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },);
+        setState(() {
+      _notesFuture=fetchNotes();
+
+    });
+    if (response.statusCode==204){
+    setState(() {
+      _notesFuture=fetchNotes();
+
+    });
+    print('delete done');
+    }else{
+      print(' delete failed ${response.statusCode}');
+    }
+}
+
+
+Future<void> updateNote(int noteid,String updatednote) async {
+  final response = await http.put(
+    Uri.parse('http://10.0.2.2:8000/notes/$noteid/update/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, String>{
+      'body': updatednote,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    setState(() {
+      _notesFuture = fetchNotes();
+    });
+    print('Put done');
+  } else {
+    print('Failed ${response.statusCode}');
+  }}
+
+
+  void _showEditDialog(int noteId, String currentNote) {
+  TextEditingController editController = TextEditingController(text: currentNote);
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Edit Note"),
+        content: TextField(
+          controller: editController,
+          decoration: InputDecoration(labelText: "Edit note"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              updateNote(noteId, editController.text);
+              Navigator.pop(context);
+            },
+            child: Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,16 +162,35 @@ class _NoteScreenState extends State<NoteScreen> {
                     children: [
                       Expanded(
                         child: ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          shrinkWrap: true,
-                          itemCount: notes.length,
-                          itemBuilder: (context, index) {
-                            final note = notes[index];
-                            return ListTile(
-                              title: Text(note['body']),
-                            );
-                          },
-                        ),
+                                scrollDirection: Axis.vertical,
+                                shrinkWrap: true,
+                                itemCount: notes.length,
+                                itemBuilder: (context, index) {
+                                  final note = notes[index];
+                                  return Container(
+                                    child: ListTile(
+                                      title: Text(note['body']),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.edit),
+                                            onPressed: () {
+                                              _showEditDialog(note['id'], note['body']);
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            onPressed: () {
+                                              deleteNote(note['id']);
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),
@@ -119,9 +221,10 @@ class _NoteScreenState extends State<NoteScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      CreateNote(_controller.text);
+                      createNote(_controller.text);
                       Navigator.pop(context);
                       _controller.clear();
+
                     },
                     child: const Text("Create"),
                   ),
@@ -135,5 +238,8 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 }
+
+
+
 
 
