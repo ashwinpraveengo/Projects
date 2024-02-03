@@ -110,24 +110,24 @@ Future<void> updateNote(int noteid,String updatednote) async {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text("Edit Note"),
+        title: const Text("Edit Note"),
         content: TextField(
           controller: editController,
-          decoration: InputDecoration(labelText: "Edit note"),
+          decoration: const InputDecoration(labelText: "Edit note"),
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               updateNote(noteId, editController.text);
               Navigator.pop(context);
             },
-            child: Text("Save"),
+            child: const Text("Save"),
           ),
         ],
       );
@@ -136,110 +136,109 @@ Future<void> updateNote(int noteid,String updatednote) async {
 }
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _notesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            } else {
-              final List<Map<String, dynamic>> notes = snapshot.data!;
-              return Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ListView.builder(
-                                scrollDirection: Axis.vertical,
-                                shrinkWrap: true,
-                                itemCount: notes.length,
-                                itemBuilder: (context, index) {
-                                  final note = notes[index];
-                                  return Container(
-                                    child: ListTile(
-                                      title: Text(note['body']),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.edit),
-                                            onPressed: () {
-                                              _showEditDialog(note['id'], note['body']);
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete),
-                                            onPressed: () {
-                                              deleteNote(note['id']);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Notes App'), // Add app title
+    ),
+    backgroundColor: Colors.white,
+    body: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _notesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );  
+          } else {
+            final List<Map<String, dynamic>> notes = snapshot.data!;
+            return Column(
+              children: [
+                const SizedBox(height: 20), // Add space between app title and list
+                Expanded(
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: notes.length,
+                    itemBuilder: (context, index) {
+                      final note = notes[index];
+                      return Container(
+                        height: 150,
+                        width: 200,
+                        margin: const EdgeInsets.only(bottom: 20), // Add space between containers
+                        decoration: const BoxDecoration(
+                          color: Colors.lightBlue,
+                          borderRadius: BorderRadius.all(Radius.elliptical(10,30))
+                        ),
+                        child: ListTile(
+                          title: Text(note['body']),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  _showEditDialog(note['id'], note['body']);
                                 },
                               ),
-                      ),
-                    ],
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  deleteNote(note['id']);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              );
-            }
-          },
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text("Create Note"),
-                content: TextField(
-                  controller: _controller,
-                  decoration: const InputDecoration(labelText: "Enter note"),
                 ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      createNote(_controller.text);
-                      Navigator.pop(context);
-                      _controller.clear();
-
-                    },
-                    child: const Text("Create"),
-                  ),
-                ],
-              );
-            },
-          );
+              ],
+            );
+          }
         },
-        child: const Icon(Icons.add),
       ),
-    );
-  }
-}
-
-
-
-
-
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    floatingActionButton: FloatingActionButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Create Note"),
+              content: TextField(
+                controller: _controller,
+                decoration: const InputDecoration(labelText: "Enter note"),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    createNote(_controller.text);
+                    Navigator.pop(context);
+                    _controller.clear();
+                  },
+                  child: const Text("Create"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: const Icon(Icons.add),
+    ),
+  );
+}}
